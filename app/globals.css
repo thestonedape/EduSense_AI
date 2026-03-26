@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(24, 91, 99, 0.08), transparent 24%),
+      radial-gradient(circle at right top, rgba(195, 106, 45, 0.1), transparent 22%),
+      linear-gradient(180deg, #fcfbf8 0%, #f7f4ee 100%);
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+}
+
+@layer utilities {
+  .surface {
+    @apply rounded-[1.75rem] border border-border bg-card shadow-panel;
+  }
+
+  .page-wrap {
+    @apply mx-auto w-full max-w-7xl px-6 py-10;
+  }
+}

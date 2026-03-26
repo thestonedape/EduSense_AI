@@ -1,0 +1,14 @@
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
+  const redirectTo = request.nextUrl.searchParams.get("redirect") || "/login";
+  const response = NextResponse.json({ ok: true, redirectTo });
+  response.cookies.set({
+    name: "edusense_session",
+    value: "",
+    httpOnly: true,
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
+}
