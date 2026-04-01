@@ -1,9 +1,9 @@
-node_modules
-.next
-.turbo
-out
-dist
-coverage
+node_modules/
+.next/
+.turbo/
+out/
+dist/
+coverage/
 
 # Logs
 *.log
@@ -29,4 +29,9 @@ Thumbs.db
 *.tsbuildinfo
 
 # Deployment
-.vercel
+.vercel/
+
+# Docker
+.docker/
+docker-compose.override.yml
+*.pid

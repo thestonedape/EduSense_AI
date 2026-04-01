@@ -1,32 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authenticateUser, authPaths, createSessionCookie, UserRole } from "@/lib/auth";
+import { authenticateUser, authPaths, createSessionCookie, registerStudent, UserRole } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const email = String(body.email ?? "").trim().toLowerCase();
   const password = String(body.password ?? "");
   const role = body.role as UserRole;
+  const intent = body.intent === "sign_up" ? "sign_up" : "sign_in";
 
   if (role !== "student" && role !== "admin") {
     return NextResponse.json({ message: "Invalid role." }, { status: 400 });
   }
 
-  const user = authenticateUser(email, password, role);
+  const authResult =
+    role === "student" && intent === "sign_up"
+      ? await registerStudent(email, password)
+      : await authenticateUser(email, password, role);
+  const { user, message } = authResult;
 
   if (!user) {
     return NextResponse.json(
-      { message: "Invalid credentials. Use the demo credentials shown on the login page." },
+      { message: message || "Login failed." },
       { status: 401 },
     );
   }
 
   const response = NextResponse.json({
     ok: true,
-    redirectTo: role === "admin" ? "/admin" : "/",
+    redirectTo: user.role === "admin" ? "/admin" : "/",
   });
 
-  response.cookies.set(createSessionCookie(user));
+  response.cookies.set(await createSessionCookie(user));
   return response;
 }
 

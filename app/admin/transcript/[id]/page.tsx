@@ -1,13 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { getTranscript } from "@/lib/api/services";
-import { TranscriptSentence } from "@/types";
+import { getLectureDetail } from "@/lib/api/services";
 import { TranscriptEditor } from "./transcript-editor";
 
 export default async function TranscriptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const rows = ((await getTranscript(id)) as TranscriptSentence[]) || [];
+  const lecture = await getLectureDetail(id);
 
-  return <TranscriptEditor initialRows={rows} />;
+  return <TranscriptEditor lecture={lecture} />;
 }

@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { authPaths } from "@/lib/auth";
+import { authPaths, decodeSession } from "@/lib/auth";
 
 type SessionUser = {
   role: "student" | "admin";
 };
 
-function readSession(request: NextRequest): SessionUser | null {
+async function readSession(request: NextRequest): Promise<SessionUser | null> {
   const raw = request.cookies.get("edusense_session")?.value;
-  if (!raw) return null;
-
-  try {
-    return JSON.parse(raw) as SessionUser;
-  } catch {
-    return null;
-  }
+  return decodeSession(raw);
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const session = readSession(request);
+  const session = await readSession(request);
 
   if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.includes(".")) {
     return NextResponse.next();
@@ -69,5 +63,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!favicon.ico).*)"],
+  matcher: [
+    {
+      source: "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };

@@ -13,7 +13,8 @@ export function TopicList({ topics }: { topics: KnowledgeTopic[] }) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-medium">{topic.name}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{topic.linkedLectures.join(", ")}</p>
+                {topic.summary ? <p className="mt-1 text-sm text-muted-foreground">{topic.summary}</p> : null}
+                <p className="mt-2 text-sm text-muted-foreground">{topic.linkedLectures.join(", ")}</p>
               </div>
               <span className="text-sm font-semibold">{topic.validatedClaims} claims</span>
             </div>

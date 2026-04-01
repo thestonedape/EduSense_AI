@@ -1,36 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { AdminSidebar } from "@/components/admin-sidebar";
 import { LogoutButton } from "@/components/logout-button";
 
-type SessionUser = {
-  name: string;
-};
-
-export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
+export function AdminLayoutShell({ children, userName }: { children: React.ReactNode; userName?: string | null }) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
-  const [user, setUser] = useState<SessionUser | null>(null);
-
-  useEffect(() => {
-    if (isLoginPage) return;
-
-    const raw = document.cookie
-      .split("; ")
-      .find((entry) => entry.startsWith("edusense_session="));
-
-    if (!raw) return;
-
-    try {
-      const value = decodeURIComponent(raw.split("=")[1] ?? "");
-      setUser(JSON.parse(value) as SessionUser);
-    } catch {
-      setUser(null);
-    }
-  }, [isLoginPage]);
 
   if (isLoginPage) {
     return <>{children}</>;
@@ -38,13 +15,13 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#edf1f3] text-slate-900">
-      <div className="mx-auto flex max-w-[1600px] gap-6 px-6 py-6">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:flex-row lg:gap-6">
         <AdminSidebar />
         <main className="min-w-0 flex-1 space-y-6">
-          <div className="flex items-center justify-between rounded-[1.5rem] border border-border bg-white px-6 py-4 shadow-panel">
+          <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border bg-white px-4 py-4 shadow-panel sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
-              <p className="text-sm font-medium text-slate-500">Signed in as</p>
-              <p className="font-display text-xl font-semibold">{user?.name ?? "Admin"}</p>
+              <p className="text-sm font-medium text-slate-500">Logged in as</p>
+              <p className="font-display text-xl font-semibold">{userName ?? "Admin"}</p>
             </div>
             <LogoutButton redirectTo="/admin/login" />
           </div>

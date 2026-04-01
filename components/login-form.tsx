@@ -8,25 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { UserRole } from "@/lib/auth";
 
-const demoCredentials = {
-  student: {
-    email: "student@edusense.ai",
-    password: "student123",
-    label: "Student demo",
-  },
-  admin: {
-    email: "admin@edusense.ai",
-    password: "admin123",
-    label: "Admin demo",
-  },
-};
-
 export function LoginForm({ role }: { role: UserRole }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
-  const [email, setEmail] = useState(demoCredentials[role].email);
-  const [password, setPassword] = useState(demoCredentials[role].password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [studentMode, setStudentMode] = useState<"sign_in" | "sign_up">("sign_in");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +26,7 @@ export function LoginForm({ role }: { role: UserRole }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password, role, intent: role === "student" ? studentMode : "sign_in" }),
       });
 
       const data = await response.json();
@@ -56,14 +44,42 @@ export function LoginForm({ role }: { role: UserRole }) {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>{role === "admin" ? "Admin Login" : "Student Login"}</CardTitle>
+        <CardTitle>
+          {role === "admin" ? "Admin Login" : studentMode === "sign_up" ? "Student Sign Up" : "Student Login"}
+        </CardTitle>
         <CardDescription>
           {role === "admin"
             ? "Access the validation pipeline, monitoring, and quality controls."
-            : "Access your clean learning dashboard, lectures, and practice."}
+            : studentMode === "sign_up"
+              ? "Create your student account to access validated lectures, tutor help, and practice."
+              : "Access your clean learning dashboard, lectures, and practice."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
+        {role === "student" ? (
+          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setStudentMode("sign_in");
+                setError("");
+              }}
+              className={`rounded-xl px-3 py-2 text-sm font-medium transition ${studentMode === "sign_in" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStudentMode("sign_up");
+                setError("");
+              }}
+              className={`rounded-xl px-3 py-2 text-sm font-medium transition ${studentMode === "sign_up" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              Sign Up
+            </button>
+          </div>
+        ) : null}
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <label className="text-sm font-medium">Email</label>
@@ -74,14 +90,25 @@ export function LoginForm({ role }: { role: UserRole }) {
             <Input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required />
           </div>
           <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Signing in..." : "Sign In"}
+            {pending
+              ? role === "student" && studentMode === "sign_up"
+                ? "Creating account..."
+                : "Signing in..."
+              : role === "student" && studentMode === "sign_up"
+                ? "Create Student Account"
+                : "Sign In"}
           </Button>
         </form>
 
         <div className="rounded-2xl border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">{demoCredentials[role].label}</p>
-          <p>{demoCredentials[role].email}</p>
-          <p>{demoCredentials[role].password}</p>
+          <p className="font-medium text-foreground">Portal access</p>
+          <p>
+            {role === "admin"
+              ? "Sign in with a Supabase account that has been granted admin access."
+              : studentMode === "sign_up"
+                ? "Student registration is self-service. Admin accounts are never created from this form."
+                : "Use sign in if you already have a student account, or switch to sign up to create one."}
+          </p>
         </div>
 
         {error ? <p className="text-sm text-danger">{error}</p> : null}

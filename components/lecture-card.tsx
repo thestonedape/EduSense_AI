@@ -1,31 +1,35 @@
 import Link from "next/link";
-import { PlayCircle } from "lucide-react";
+import { CalendarDays, PlayCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lecture } from "@/types";
+import { StudentLectureSummary } from "@/types";
 
-const statusVariant = {
-  completed: "success",
-  in_progress: "warning",
-  not_started: "outline",
-} as const;
-
-export function LectureCard({ lecture }: { lecture: Lecture }) {
+export function LectureCard({ lecture }: { lecture: StudentLectureSummary }) {
   return (
     <Link href={`/lecture/${lecture.id}`}>
-      <Card className="h-full transition-transform duration-200 hover:-translate-y-1">
-        <CardHeader className="space-y-3">
+      <Card className="h-full overflow-hidden border-border/80 transition-transform duration-200 hover:-translate-y-1 hover:border-primary/25">
+        <CardHeader className="space-y-4 bg-[linear-gradient(180deg,_rgba(14,165,233,0.08),_rgba(255,255,255,0))]">
           <div className="flex items-center justify-between gap-3">
-            <Badge variant={statusVariant[lecture.status]}>{lecture.status.replace("_", " ")}</Badge>
-            <span className="text-sm text-muted-foreground">{lecture.duration}</span>
+            <Badge variant="success">{lecture.validationSource.replace("-", " ")}</Badge>
+            <span className="text-sm text-muted-foreground">
+              {lecture.topicCount} topic{lecture.topicCount === 1 ? "" : "s"}
+            </span>
           </div>
-          <CardTitle>{lecture.title}</CardTitle>
-          <CardDescription>{lecture.summary}</CardDescription>
+          <CardTitle className="text-xl">{lecture.lectureName}</CardTitle>
+          <CardDescription className="line-clamp-4 leading-6">{lecture.summary}</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-between text-sm font-medium">
-          <span className="text-primary">Open lecture</span>
-          <PlayCircle className="h-4 w-4 text-primary" />
+        <CardContent className="space-y-3 text-sm font-medium">
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center gap-2 text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            {lecture.lectureDate ?? "Date not set"}
+            </span>
+            <PlayCircle className="h-4 w-4 text-primary" />
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {lecture.facultyName || "Lecture ready to study"}
+          </div>
         </CardContent>
       </Card>
     </Link>

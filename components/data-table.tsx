@@ -7,7 +7,7 @@ type DataTableProps<T> = {
   title: string;
   columns: string[];
   rows: T[];
-  renderRow: (row: T) => ReactNode;
+  renderRow: (row: T, index: number) => ReactNode;
 };
 
 export function DataTable<T>({ title, columns, rows, renderRow }: DataTableProps<T>) {
@@ -25,7 +25,7 @@ export function DataTable<T>({ title, columns, rows, renderRow }: DataTableProps
               ))}
             </TableRow>
           </TableHeader>
-          <TableBody>{rows.map(renderRow)}</TableBody>
+          <TableBody>{rows.map((row, index) => renderRow(row, index))}</TableBody>
         </Table>
       </CardContent>
     </Card>

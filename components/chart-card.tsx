@@ -15,8 +15,8 @@ export function ChartCard({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {items.map((item) => (
-          <div key={item.label} className="space-y-2">
+        {items.map((item, index) => (
+          <div key={`${item.label}-${index}`} className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{item.label}</span>
               <span className="font-medium">{item.value}</span>
