@@ -24,6 +24,8 @@ export default function UploadManagerPage() {
   const [message, setMessage] = useState("");
   const today = new Date().toISOString().slice(0, 10);
   const [catalog, setCatalog] = useState<CatalogDepartment[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState("");
   const [departmentName, setDepartmentName] = useState("");
   const [programName, setProgramName] = useState("");
   const [subjectValue, setSubjectValue] = useState("");
@@ -32,10 +34,15 @@ export default function UploadManagerPage() {
     let cancelled = false;
 
     async function loadCatalog() {
+      setCatalogLoading(true);
+      setCatalogError("");
       try {
         const data = await getAcademicCatalog();
         if (cancelled) return;
         setCatalog(data);
+        if (!data.length) {
+          setCatalogError("The academic catalog is empty right now. Add at least one department, program, and subject on the backend.");
+        }
         const firstDepartment = data[0];
         const firstProgram = firstDepartment?.programs[0];
         const firstSubject = firstProgram?.subjects[0];
@@ -45,6 +52,11 @@ export default function UploadManagerPage() {
       } catch {
         if (!cancelled) {
           setCatalog([]);
+          setCatalogError("We could not load departments, programs, and subjects from the backend.");
+        }
+      } finally {
+        if (!cancelled) {
+          setCatalogLoading(false);
         }
       }
     }
@@ -62,6 +74,7 @@ export default function UploadManagerPage() {
   const programs = selectedDepartment?.programs ?? [];
   const selectedProgram = programs.find((item) => item.name === programName) ?? null;
   const subjects = selectedProgram?.subjects ?? [];
+  const catalogReady = Boolean(catalog.length) && !catalogLoading && !catalogError;
 
   useEffect(() => {
     if (!programs.length) {
@@ -153,8 +166,9 @@ export default function UploadManagerPage() {
                 onChange={(event) => setDepartmentName(event.target.value)}
                 className="h-12 rounded-xl border border-input bg-background px-4 text-sm outline-none"
                 required
+                disabled={!catalogReady}
               >
-                <option value="">Department</option>
+                <option value="">{catalogLoading ? "Loading departments..." : "Department"}</option>
                 {catalog.map((item) => (
                   <option key={item.department} value={item.department}>
                     {item.department}
@@ -166,6 +180,7 @@ export default function UploadManagerPage() {
                 onChange={(event) => setProgramName(event.target.value)}
                 className="h-12 rounded-xl border border-input bg-background px-4 text-sm outline-none"
                 required
+                disabled={!catalogReady}
               >
                 <option value="">Program</option>
                 {programs.map((item) => (
@@ -181,6 +196,7 @@ export default function UploadManagerPage() {
                 onChange={(event) => setSubjectValue(event.target.value)}
                 className="h-12 rounded-xl border border-input bg-background px-4 text-sm outline-none"
                 required
+                disabled={!catalogReady}
               >
                 <option value="">Subject</option>
                 {subjects.map((item) => (
@@ -191,6 +207,14 @@ export default function UploadManagerPage() {
               </select>
               <Input name="lecture_number" type="number" min="1" placeholder="Lecture number" />
             </div>
+            {catalogError ? (
+              <p className="text-sm font-medium text-danger">{catalogError}</p>
+            ) : catalogReady ? (
+              <p className="text-sm text-muted-foreground">
+                Loaded {catalog.length} department{catalog.length === 1 ? "" : "s"} and {subjects.length} subject
+                {subjects.length === 1 ? "" : "s"} for the selected program.
+              </p>
+            ) : null}
             <div className="grid gap-4 md:grid-cols-2">
               <Input name="lecture_date" type="date" defaultValue={today} />
               <Input name="faculty_name" placeholder="Faculty name" />
