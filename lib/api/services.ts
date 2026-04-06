@@ -593,7 +593,9 @@ export const getDashboard = cache(async function getDashboard(): Promise<Dashboa
 export async function uploadLecture(payload: FormData) {
   return withRequiredApi(async () => {
     const response = await api.post(`${API_PREFIX}/upload`, payload, {
-      headers: { "Content-Type": "multipart/form-data" },
+      // Uploads can take much longer than the default API timeout because the backend
+      // persists files locally and may mirror them into Supabase storage before returning.
+      timeout: 10 * 60 * 1000,
     });
     return response.data;
   });
