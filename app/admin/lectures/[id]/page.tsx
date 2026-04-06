@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLectureDetail } from "@/lib/api/services";
 
+export const dynamic = "force-dynamic";
+
 const stageOrder = [
   "uploaded",
   "transcribed",

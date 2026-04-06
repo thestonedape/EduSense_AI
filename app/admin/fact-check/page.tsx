@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProcessing } from "@/lib/api/services";
 import type { ProcessingJob } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function FactCheckIndexPage() {
   let jobs: ProcessingJob[] = [];
   let loadFailed = false;

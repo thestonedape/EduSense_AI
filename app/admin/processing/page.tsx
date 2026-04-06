@@ -10,6 +10,8 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { getProcessing } from "@/lib/api/services";
 import type { ProcessingJob } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProcessingMonitorPage() {
   let jobs: ProcessingJob[] = [];
   let loadFailed = false;

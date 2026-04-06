@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { getKnowledge } from "@/lib/api/services";
 import type { KnowledgeTopic } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function KnowledgePage({
   searchParams,
 }: {

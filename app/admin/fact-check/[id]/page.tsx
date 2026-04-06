@@ -1,6 +1,8 @@
 import { ClaimCard } from "@/components/claim-card";
 import { getFactCheck } from "@/lib/api/services";
 
+export const dynamic = "force-dynamic";
+
 export default async function FactCheckPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const result = await getFactCheck(id);

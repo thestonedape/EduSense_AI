@@ -4,6 +4,8 @@ import { DataTable } from "@/components/data-table";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { getAnalytics } from "@/lib/api/services";
 
+export const dynamic = "force-dynamic";
+
 export default async function AnalyticsPage() {
   let analytics;
   let loadFailed = false;

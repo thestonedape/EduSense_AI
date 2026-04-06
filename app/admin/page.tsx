@@ -2,6 +2,8 @@ import { ChartCard } from "@/components/chart-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDashboard } from "@/lib/api/services";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   const dashboard = await getDashboard();
   const summary = dashboard.summary;
