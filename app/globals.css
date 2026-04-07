@@ -5,6 +5,12 @@
 @layer base {
   :root {
     color-scheme: light;
+    --landing-background: #f6f4ef;
+    --landing-surface: rgba(246, 244, 239, 0.86);
+    --landing-card: #ffffff;
+    --landing-foreground: #151c23;
+    --landing-muted: #5f6873;
+    --landing-accent: #176b5f;
   }
 
   * {
@@ -23,6 +29,18 @@
   a {
     @apply text-inherit no-underline;
   }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --landing-background: #0d1117;
+      --landing-surface: rgba(13, 17, 23, 0.82);
+      --landing-card: #121822;
+      --landing-foreground: #edf2f7;
+      --landing-muted: #9aa6b2;
+      --landing-accent: #7be0cb;
+    }
+  }
 }
 
 @layer utilities {
@@ -32,5 +50,21 @@
 
   .page-wrap {
     @apply mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10;
+  }
+
+  .landing-reveal {
+    animation: landing-reveal 700ms ease-out both;
+  }
+}
+
+@keyframes landing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
