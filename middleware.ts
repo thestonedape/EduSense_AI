@@ -14,12 +14,16 @@ async function readSession(request: NextRequest): Promise<SessionUser | null> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await readSession(request);
+  const isStudentAuthPath =
+    pathname === authPaths.studentLogin || pathname === authPaths.studentAccess;
+  const isAdminAuthPath =
+    pathname === authPaths.adminLogin || pathname === authPaths.adminAccess;
 
   if (pathname.startsWith("/_next") || pathname.startsWith("/api") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-  if (pathname === authPaths.studentLogin) {
+  if (isStudentAuthPath) {
     if (session?.role === "student") {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -29,7 +33,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === authPaths.adminLogin) {
+  if (isAdminAuthPath) {
     if (session?.role === "admin") {
       return NextResponse.redirect(new URL("/admin", request.url));
     }

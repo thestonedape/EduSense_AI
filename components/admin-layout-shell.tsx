@@ -7,7 +7,7 @@ import { LogoutButton } from "@/components/logout-button";
 
 export function AdminLayoutShell({ children, userName }: { children: React.ReactNode; userName?: string | null }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/admin/login";
+  const isLoginPage = pathname === "/admin/login" || pathname.startsWith("/admin/login/");
 
   if (isLoginPage) {
     return <>{children}</>;

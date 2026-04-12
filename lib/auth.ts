@@ -234,5 +234,7 @@ export async function createSessionCookie(user: SessionUser) {
 
 export const authPaths = {
   studentLogin: "/login",
+  studentAccess: "/login/access",
   adminLogin: "/admin/login",
+  adminAccess: "/admin/login/access",
 };

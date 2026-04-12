@@ -1,23 +1,22 @@
 import { Activity, DatabaseZap, ScanSearch, ShieldCheck, UploadCloud } from "lucide-react";
 
-import { LoginForm } from "@/components/login-form";
 import { PortalAuthShell } from "@/components/portal-auth-shell";
 
 export default function AdminLoginPage() {
   const adminCapabilities = [
     {
-      title: "Lecture intake",
-      description: "Upload raw lecture media, attach trusted references, and create structured review records.",
+      title: "Upload and organize source material",
+      description: "Bring in recordings, references, and metadata before the pipeline starts.",
       icon: UploadCloud,
     },
     {
-      title: "Validation workflows",
-      description: "Review transcripts, approve safe topics, and control what reaches the student knowledge base.",
+      title: "Review before release",
+      description: "Transcript fixes, topic approval, and knowledge release stay under control.",
       icon: ScanSearch,
     },
     {
-      title: "Pipeline visibility",
-      description: "Track queue health, retries, and processing stages across the lecture intelligence system.",
+      title: "Keep the pipeline visible",
+      description: "Track queue state, retries, and processing progress from one place.",
       icon: Activity,
     },
   ];
@@ -27,43 +26,22 @@ export default function AdminLoginPage() {
       brandIcon={ShieldCheck}
       badgeIcon={DatabaseZap}
       badgeLabel="Admin Portal"
-      eyebrow="Review Before Release"
-      title="Manage the lecture pipeline behind the student experience."
-      description="This workspace is for upload operations, transcript quality control, topic approval, fact-check review, and processing visibility across the EduSense content system."
+      eyebrow="Operational Review Layer"
+      title="Review the lecture pipeline before students ever see it."
+      description="EduSense gives the admin side a clear control surface for uploads, transcript review, topic approval, and release. The messy operational work stays here so the student portal stays clean."
       subtitle="Admin operations and lecture validation workspace"
-      metaLabel="Why this control layer exists"
-      switchLabel="Need the student portal?"
-      switchDescription="Students should use the separate learning login built for lectures, doubts, and practice."
-      switchHref="/login"
-      switchHrefLabel="Go to student login"
+      metaLabel="Why The Admin Side Exists"
+      primaryHref="/admin/login/access"
+      primaryLabel="Admin sign in"
+      secondaryHref="/login"
+      secondaryLabel="Student portal"
       highlights={adminCapabilities}
-      features={[
-        {
-          title: "Lecture intake and structure",
-          description: "Upload raw lecture media, attach reference material, and preserve academic metadata before the pipeline starts.",
-        },
-        {
-          title: "Validation before release",
-          description: "Review transcripts, approve safe topics, and decide what reaches the student-facing knowledge base.",
-        },
-        {
-          title: "Operational visibility",
-          description: "Track queue health, retries, processing stages, and review signals from a dedicated control workspace.",
-        },
-      ]}
       metrics={[
-        { label: "Portal mode", value: "Admin" },
-        { label: "Focus", value: "Review" },
-        { label: "Output", value: "Safe" },
+        { label: "Mode", value: "Admin" },
+        { label: "Focus", value: "Control" },
+        { label: "Release", value: "Safe" },
       ]}
       theme="admin"
-    >
-      <LoginForm
-        role="admin"
-        embedded
-        title="Admin sign-in"
-        description="Use an approved admin account to manage lecture uploads, validation workflow, review queues, and analytics."
-      />
-    </PortalAuthShell>
+    />
   );
 }

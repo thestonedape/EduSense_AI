@@ -57,6 +57,77 @@ export function LoginForm({ role, embedded = false, title, description }: LoginF
       : studentMode === "sign_up"
         ? "Create your student account to access validated lectures, tutor help, and practice."
         : "Access your clean learning dashboard, lectures, and practice.");
+  const accessHint =
+    role === "admin"
+      ? "Sign in with a Supabase account that has been granted admin access."
+      : studentMode === "sign_up"
+        ? "Student registration is self-service. Admin accounts are never created from this form."
+        : "Use sign in if you already have a student account, or switch to sign up to create one.";
+
+  if (embedded) {
+    return (
+      <div className="w-full space-y-4">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+            {role === "admin" ? "Secure admin access" : "Study access"}
+          </p>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">{computedTitle}</h2>
+            <p className="text-sm leading-6 text-muted-foreground">{computedDescription}</p>
+          </div>
+        </div>
+
+        {role === "student" ? (
+          <div className="grid grid-cols-2 gap-1 rounded-full border border-border bg-muted/60 p-1">
+            <button
+              type="button"
+              onClick={() => {
+                setStudentMode("sign_in");
+                setError("");
+              }}
+              className={`rounded-full px-3 py-2 text-sm font-medium transition ${studentMode === "sign_in" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStudentMode("sign_up");
+                setError("");
+              }}
+              className={`rounded-full px-3 py-2 text-sm font-medium transition ${studentMode === "sign_up" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}
+            >
+              Sign Up
+            </button>
+          </div>
+        ) : null}
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Email</label>
+            <Input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Password</label>
+            <Input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required />
+          </div>
+          <Button type="submit" className="w-full rounded-full" disabled={pending}>
+            {pending
+              ? role === "student" && studentMode === "sign_up"
+                ? "Creating account..."
+                : "Signing in..."
+              : role === "student" && studentMode === "sign_up"
+                ? "Create Student Account"
+                : "Sign In"}
+          </Button>
+        </form>
+
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
+
+        <p className="text-xs leading-6 text-muted-foreground">{accessHint}</p>
+      </div>
+    );
+  }
 
   const content = (
     <>
@@ -113,23 +184,13 @@ export function LoginForm({ role, embedded = false, title, description }: LoginF
 
         <div className="rounded-2xl border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Portal access</p>
-          <p>
-            {role === "admin"
-              ? "Sign in with a Supabase account that has been granted admin access."
-              : studentMode === "sign_up"
-                ? "Student registration is self-service. Admin accounts are never created from this form."
-                : "Use sign in if you already have a student account, or switch to sign up to create one."}
-          </p>
+          <p>{accessHint}</p>
         </div>
 
         {error ? <p className="text-sm text-danger">{error}</p> : null}
       </CardContent>
     </>
   );
-
-  if (embedded) {
-    return <div className="w-full">{content}</div>;
-  }
 
   return <Card className="w-full max-w-md">{content}</Card>;
 }
