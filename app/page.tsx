@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookMarked, BrainCircuit, ShieldCheck } from "lucide-react";
+import { ArrowRight, BookMarked, BrainCircuit, RefreshCw, ShieldCheck } from "lucide-react";
 
 import { CourseCard } from "@/components/course-card";
 import { LectureCard } from "@/components/lecture-card";
@@ -16,7 +16,7 @@ export default async function StudentDashboardPage() {
   const startedAt = Date.now();
   const user = await getSessionUser();
   const sessionResolvedAt = Date.now();
-  const subjectsPromise = getCourses();
+  const subjectsPromise = getCourses().catch(() => null);
   const studentDashboardPromise = user ? getStudentDashboard(user.email).catch(() => null) : Promise.resolve(null);
 
   const [subjects, studentDashboard] = await Promise.all([
@@ -24,12 +24,14 @@ export default async function StudentDashboardPage() {
     studentDashboardPromise,
   ]);
   const dataResolvedAt = Date.now();
-  const featuredSubjects = subjects.slice(0, 3);
+  const backendWakingUp = subjects === null;
+  const safeSubjects = subjects ?? [];
+  const featuredSubjects = safeSubjects.slice(0, 3);
   const recentLectures = studentDashboard?.recentLectures?.slice(0, 3) ?? [];
 
   if (shouldLogHomeTiming) {
     console.info(
-      `[page-timing] / session=${sessionResolvedAt - startedAt}ms data=${dataResolvedAt - sessionResolvedAt}ms total=${dataResolvedAt - startedAt}ms subjects=${subjects.length} recents=${recentLectures.length}`,
+      `[page-timing] / session=${sessionResolvedAt - startedAt}ms data=${dataResolvedAt - sessionResolvedAt}ms total=${dataResolvedAt - startedAt}ms subjects=${safeSubjects.length} recents=${recentLectures.length}`,
     );
   }
 
@@ -37,6 +39,27 @@ export default async function StudentDashboardPage() {
     <div>
       <Navbar />
       <main className="page-wrap space-y-8">
+        {backendWakingUp ? (
+          <Card className="border-amber-200 bg-amber-50/90 shadow-sm">
+            <CardContent className="flex flex-wrap items-start justify-between gap-4 py-5">
+              <div className="flex max-w-3xl gap-3">
+                <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-amber-950">Backend is waking up</p>
+                  <p className="text-sm leading-6 text-amber-900/80">
+                    The server was sleeping, so the dashboard data is taking a little longer to come online. Give it a few seconds and refresh this page.
+                  </p>
+                </div>
+              </div>
+              <Button asChild variant="outline" className="border-amber-300 bg-white text-amber-950 hover:bg-amber-100">
+                <Link href="/">Refresh Home</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
         <section className="surface overflow-hidden p-5 sm:p-8">
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
             <div className="space-y-5">
@@ -73,7 +96,7 @@ export default async function StudentDashboardPage() {
                   </CardDescription>
                 </CardHeader>
               <CardContent className="space-y-3 text-sm text-primary-foreground/90">
-                <p>{subjects.length} subject areas are currently ready for students.</p>
+                <p>{safeSubjects.length} subject areas are currently ready for students.</p>
                 <p>{recentLectures.length} recent lecture sessions are already available for revision.</p>
                 {studentDashboard ? (
                   <p>
@@ -124,6 +147,12 @@ export default async function StudentDashboardPage() {
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
+          ) : backendWakingUp ? (
+            <Card>
+              <CardContent className="py-8 text-sm leading-7 text-muted-foreground">
+                We are waiting for the backend to wake up before validated subjects can load here. This usually resolves on its own after the first cold start request.
+              </CardContent>
+            </Card>
           ) : (
             <Card>
               <CardContent className="py-8 text-sm text-muted-foreground">
