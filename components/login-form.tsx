@@ -8,7 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { UserRole } from "@/lib/auth";
 
-export function LoginForm({ role }: { role: UserRole }) {
+type LoginFormProps = {
+  role: UserRole;
+  embedded?: boolean;
+  title?: string;
+  description?: string;
+};
+
+export function LoginForm({ role, embedded = false, title, description }: LoginFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -41,19 +48,23 @@ export function LoginForm({ role }: { role: UserRole }) {
     });
   }
 
-  return (
-    <Card className="w-full max-w-md">
+  const computedTitle =
+    title ?? (role === "admin" ? "Admin Login" : studentMode === "sign_up" ? "Student Sign Up" : "Student Login");
+  const computedDescription =
+    description ??
+    (role === "admin"
+      ? "Access the validation pipeline, monitoring, and quality controls."
+      : studentMode === "sign_up"
+        ? "Create your student account to access validated lectures, tutor help, and practice."
+        : "Access your clean learning dashboard, lectures, and practice.");
+
+  const content = (
+    <>
       <CardHeader>
-        <CardTitle>
-          {role === "admin" ? "Admin Login" : studentMode === "sign_up" ? "Student Sign Up" : "Student Login"}
-        </CardTitle>
-        <CardDescription>
-          {role === "admin"
-            ? "Access the validation pipeline, monitoring, and quality controls."
-            : studentMode === "sign_up"
-              ? "Create your student account to access validated lectures, tutor help, and practice."
-              : "Access your clean learning dashboard, lectures, and practice."}
-        </CardDescription>
+        <div className="space-y-2">
+          <CardTitle>{computedTitle}</CardTitle>
+          <CardDescription>{computedDescription}</CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="space-y-5">
         {role === "student" ? (
@@ -113,6 +124,12 @@ export function LoginForm({ role }: { role: UserRole }) {
 
         {error ? <p className="text-sm text-danger">{error}</p> : null}
       </CardContent>
-    </Card>
+    </>
   );
+
+  if (embedded) {
+    return <div className="w-full">{content}</div>;
+  }
+
+  return <Card className="w-full max-w-md">{content}</Card>;
 }
