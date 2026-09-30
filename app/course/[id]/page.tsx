@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { LectureCard } from "@/components/lecture-card";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent } from "@/components/ui/card";
-import { getCourse } from "@/lib/api/services";
+import { getCourse } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

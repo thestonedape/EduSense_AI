@@ -1,4 +1,4 @@
-import { getLectureDetail } from "@/lib/api/services";
+import { getLectureDetail } from "@/lib/api/server-services";
 import { TranscriptEditor } from "./transcript-editor";
 
 export const dynamic = "force-dynamic";

@@ -6,12 +6,16 @@ const shouldLogApiTimings = isDevelopment || process.env.LOG_API_TIMINGS === "tr
 
 export const api = axios.create({
   baseURL: apiBaseUrl,
-  timeout: isDevelopment ? 15000 : 10000,
+  timeout: 180000,
 });
 
 export const hasApiBaseUrl = Boolean(apiBaseUrl);
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
+  const response = await fetch("/api/auth/backend-token", { cache: "no-store" });
+  if (!response.ok) throw new Error("Unauthorized");
+  const { token } = await response.json();
+  config.headers.Authorization = `Bearer ${token}`;
   if (shouldLogApiTimings) {
     (config as typeof config & { metadata?: { startedAt: number } }).metadata = {
       startedAt: Date.now(),

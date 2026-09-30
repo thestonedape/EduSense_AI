@@ -1,5 +1,5 @@
 import { ClaimCard } from "@/components/claim-card";
-import { getFactCheck } from "@/lib/api/services";
+import { getFactCheck } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

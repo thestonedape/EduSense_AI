@@ -1,5 +1,5 @@
 import { AdminStatePanel } from "@/components/admin-state-panel";
-import { getAcademicCatalog } from "@/lib/api/services";
+import { getAcademicCatalog } from "@/lib/api/server-services";
 
 import { UploadManagerClient } from "./upload-manager-client";
 

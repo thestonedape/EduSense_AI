@@ -7,7 +7,7 @@ import { ProgressBar } from "@/components/progress-bar";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { getProcessing } from "@/lib/api/services";
+import { getProcessing } from "@/lib/api/server-services";
 import type { ProcessingJob } from "@/types";
 
 export const dynamic = "force-dynamic";

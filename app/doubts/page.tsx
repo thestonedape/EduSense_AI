@@ -1,5 +1,5 @@
 import { DoubtSolver } from "@/components/doubt-solver";
-import { getCourses } from "@/lib/api/services";
+import { getCourses } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

@@ -1,6 +1,6 @@
 import { CourseCard } from "@/components/course-card";
 import { Navbar } from "@/components/navbar";
-import { getCourses } from "@/lib/api/services";
+import { getCourses } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

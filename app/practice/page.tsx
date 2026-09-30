@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/navbar";
 import { QuizCard } from "@/components/quiz-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { getPracticeQuestions } from "@/lib/api/services";
+import { getPracticeQuestions } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

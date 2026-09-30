@@ -2,7 +2,7 @@ import { AdminStatePanel } from "@/components/admin-state-panel";
 import { ChartCard } from "@/components/chart-card";
 import { DataTable } from "@/components/data-table";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { getAnalytics } from "@/lib/api/services";
+import { getAnalytics } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

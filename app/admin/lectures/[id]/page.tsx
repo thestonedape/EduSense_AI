@@ -4,7 +4,7 @@ import { LectureLiveStatus } from "@/components/lecture-live-status";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLectureDetail } from "@/lib/api/services";
+import { getLectureDetail } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

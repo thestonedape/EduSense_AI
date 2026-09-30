@@ -16,7 +16,7 @@ import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getCourses, getStudentDashboard } from "@/lib/api/services";
+import { getCourses, getStudentDashboard } from "@/lib/api/server-services";
 import { getSessionUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
