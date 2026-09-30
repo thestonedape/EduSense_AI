@@ -10,6 +10,7 @@ export type SessionUser = {
 };
 
 const SESSION_COOKIE = "edusense_session";
+const AUTH_POLICY_VERSION = 2;
 
 type SupabaseAuthUser = {
   email?: string | null;
@@ -187,7 +188,7 @@ export async function registerStudent(email: string, password: string): Promise<
 }
 
 export async function encodeSession(user: SessionUser): Promise<string> {
-  const payload = base64UrlEncode(JSON.stringify({ ...user, exp: Math.floor(Date.now() / 1000) + 8 * 60 * 60 }));
+  const payload = base64UrlEncode(JSON.stringify({ ...user, auth_version: AUTH_POLICY_VERSION, exp: Math.floor(Date.now() / 1000) + 8 * 60 * 60 }));
   const signature = await signValue(payload);
   return `${payload}.${signature}`;
 }
@@ -203,7 +204,9 @@ export async function decodeSession(raw: string | undefined): Promise<SessionUse
     const valid = await crypto.subtle.verify("HMAC", key, new Uint8Array(Buffer.from(signature, "base64url")), new TextEncoder().encode(payload));
     if (!valid) return null;
     const user = JSON.parse(base64UrlDecode(payload));
-    if (!user.exp || user.exp <= Date.now() / 1000 || !["student", "admin"].includes(user.role) || typeof user.email !== "string") return null;
+    // Cookies issued under the old editable-metadata role policy must not be
+    // exchanged for newly trusted backend claims after deployment.
+    if (user.auth_version !== AUTH_POLICY_VERSION || !user.exp || user.exp <= Date.now() / 1000 || !["student", "admin"].includes(user.role) || typeof user.email !== "string") return null;
     return user as SessionUser;
   } catch {
     return null;
