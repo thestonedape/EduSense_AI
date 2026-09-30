@@ -8,7 +8,7 @@ import { Navbar } from "@/components/navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLecture } from "@/lib/api/services";
+import { getLecture } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 

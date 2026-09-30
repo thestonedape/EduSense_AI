@@ -2,7 +2,7 @@ import { AdminStatePanel } from "@/components/admin-state-panel";
 import { TopicList } from "@/components/topic-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getKnowledge } from "@/lib/api/services";
+import { getKnowledge } from "@/lib/api/server-services";
 import type { KnowledgeTopic } from "@/types";
 
 export const dynamic = "force-dynamic";

@@ -61,14 +61,9 @@ function parseEmailList(value: string | undefined): Set<string> {
 function resolveRole(user: SupabaseAuthUser): UserRole {
   const email = String(user.email || "").trim().toLowerCase();
   const appRole = typeof user.app_metadata?.role === "string" ? user.app_metadata.role : null;
-  const userRole = typeof user.user_metadata?.role === "string" ? user.user_metadata.role : null;
-  const normalizedMetadataRole = (appRole || userRole || "").trim().toLowerCase();
-  if (normalizedMetadataRole === "admin" || normalizedMetadataRole === "student") {
-    return normalizedMetadataRole;
-  }
-
+  const normalizedMetadataRole = (appRole || "").trim().toLowerCase();
   const adminEmails = parseEmailList(process.env.ADMIN_ALLOWED_EMAILS);
-  if (adminEmails.has(email)) {
+  if (adminEmails.has(email) || normalizedMetadataRole === "admin") {
     return "admin";
   }
 
@@ -192,23 +187,24 @@ export async function registerStudent(email: string, password: string): Promise<
 }
 
 export async function encodeSession(user: SessionUser): Promise<string> {
-  const payload = base64UrlEncode(JSON.stringify(user));
+  const payload = base64UrlEncode(JSON.stringify({ ...user, exp: Math.floor(Date.now() / 1000) + 8 * 60 * 60 }));
   const signature = await signValue(payload);
   return `${payload}.${signature}`;
 }
 
 export async function decodeSession(raw: string | undefined): Promise<SessionUser | null> {
   if (!raw) return null;
+  if (raw.split(".").length !== 2) return null;
   const [payload, signature] = raw.split(".");
   if (!payload || !signature) return null;
 
-  const expectedSignature = await signValue(payload);
-  if (signature !== expectedSignature) {
-    return null;
-  }
-
   try {
-    return JSON.parse(base64UrlDecode(payload)) as SessionUser;
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(authSecret()), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+    const valid = await crypto.subtle.verify("HMAC", key, new Uint8Array(Buffer.from(signature, "base64url")), new TextEncoder().encode(payload));
+    if (!valid) return null;
+    const user = JSON.parse(base64UrlDecode(payload));
+    if (!user.exp || user.exp <= Date.now() / 1000 || !["student", "admin"].includes(user.role) || typeof user.email !== "string") return null;
+    return user as SessionUser;
   } catch {
     return null;
   }

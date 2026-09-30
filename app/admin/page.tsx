@@ -1,6 +1,6 @@
 import { ChartCard } from "@/components/chart-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getDashboard } from "@/lib/api/services";
+import { getDashboard } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 
