@@ -11,10 +11,24 @@ export const api = axios.create({
 
 export const hasApiBaseUrl = Boolean(apiBaseUrl);
 
+// Share only simultaneous token requests. Do not cache resolved tokens across
+// operations, so a logout or account change cannot reuse old credentials.
+let inflightToken: Promise<string> | null = null;
+function getBackendToken(): Promise<string> {
+  if (!inflightToken) {
+    inflightToken = (async () => {
+      const response = await fetch("/api/auth/backend-token", { cache: "no-store" });
+      if (!response.ok) throw new Error("Unauthorized");
+      const body = await response.json();
+      if (typeof body.token !== "string") throw new Error("Invalid backend token");
+      return body.token as string;
+    })().finally(() => { inflightToken = null; });
+  }
+  return inflightToken;
+}
+
 api.interceptors.request.use(async (config) => {
-  const response = await fetch("/api/auth/backend-token", { cache: "no-store" });
-  if (!response.ok) throw new Error("Unauthorized");
-  const { token } = await response.json();
+  const token = await getBackendToken();
   config.headers.Authorization = `Bearer ${token}`;
   if (shouldLogApiTimings) {
     (config as typeof config & { metadata?: { startedAt: number } }).metadata = {
