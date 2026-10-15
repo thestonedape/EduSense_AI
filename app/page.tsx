@@ -12,7 +12,7 @@ async function StudyCard() {
   const user = await getSessionUser();
   const [subjects, dashboard] = await Promise.all([
     getCourses().catch(() => null),
-    user ? getStudentDashboard(user.email).catch(() => null) : Promise.resolve(null),
+    user ? getStudentDashboard(user.email, false).catch(() => null) : Promise.resolve(null),
   ]);
   const courses = subjects ?? [];
   const recent = dashboard?.recentLectures?.slice(0, 4) ?? [];
@@ -76,7 +76,7 @@ function SubjectListSkeleton() {
 
 async function RecentList() {
   const user = await getSessionUser();
-  const dashboard = user ? await getStudentDashboard(user.email).catch(() => null) : null;
+  const dashboard = user ? await getStudentDashboard(user.email, false).catch(() => null) : null;
   const recent = dashboard?.recentLectures?.slice(0, 4) ?? [];
   return (
             <div className="ed-recent-list">
