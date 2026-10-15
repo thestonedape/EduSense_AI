@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+  const started = performance.now();
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
+  const backendStarted = performance.now();
   const response = await fetch(`${apiBaseUrl}/api/v1/student/chat`, {
     method: "POST",
     headers: {
@@ -33,5 +35,10 @@ export async function POST(request: NextRequest) {
   });
 
   const payload = await response.json().catch(() => ({ message: "Student chat failed." }));
-  return NextResponse.json(payload, { status: response.status });
+  const backendMs = performance.now() - backendStarted;
+  const totalMs = performance.now() - started;
+  return NextResponse.json(payload, {
+    status: response.status,
+    headers: { "Server-Timing": `backend;dur=${backendMs.toFixed(1)}, total;dur=${totalMs.toFixed(1)}` },
+  });
 }
