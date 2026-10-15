@@ -445,9 +445,12 @@ const getCourses = cache(async function getCourses(): Promise<StudentSubject[]> 
 
 const getStudentDashboard = cache(async function getStudentDashboard(
   studentEmail: string,
+  includeStats = true,
 ): Promise<StudentDashboardData> {
   return withRequiredApi(async () => {
-    const response = await api.get(`${API_PREFIX}/student/dashboard`);
+    const response = await api.get(`${API_PREFIX}/student/dashboard`, {
+      params: includeStats ? undefined : { include_stats: false },
+    });
     const payload = response.data as Record<string, unknown>;
     const statsValue = typeof payload.stats === "object" && payload.stats !== null ? (payload.stats as Record<string, unknown>) : {};
     const lectureItems = Array.isArray(payload.recent_lectures) ? payload.recent_lectures : [];
