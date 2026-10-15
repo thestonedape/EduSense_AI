@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowRight, ArrowUpRight, BookOpen, MessageCircleQuestion, Play } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { getCourses, getStudentDashboard } from "@/lib/api/server-services";
@@ -6,7 +7,8 @@ import { getSessionUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function StudentDashboardPage() {
+
+async function StudyCard() {
   const user = await getSessionUser();
   const [subjects, dashboard] = await Promise.all([
     getCourses().catch(() => null),
@@ -14,24 +16,7 @@ export default async function StudentDashboardPage() {
   ]);
   const courses = subjects ?? [];
   const recent = dashboard?.recentLectures?.slice(0, 4) ?? [];
-  const featured = courses.slice(0, 5);
-  const greeting = user?.name?.split(" ")[0] ?? "there";
-
   return (
-    <div className="ed-app">
-      <Navbar />
-      <main>
-        <section className="ed-hero ed-container">
-          <div className="ed-hero-copy">
-            <div className="ed-eyebrow"><span className="ed-square" /> THE STUDENT DESK / 001</div>
-            <p className="ed-greeting">Good to see you, {greeting}.</p>
-            <h1>Make room<br />for <em>learning.</em></h1>
-            <p className="ed-intro">Your lectures, notes, and questions. A little less searching, a lot more understanding.</p>
-            <div className="ed-actions">
-              <Link className="ed-button ed-button-dark" href="/courses">Browse subjects <ArrowUpRight size={17} /></Link>
-              <Link className="ed-inline-link" href="/doubts">Ask a question <ArrowRight size={16} /></Link>
-            </div>
-          </div>
           <div className="ed-study-card">
             <div className="ed-card-top"><span>DESK / CURRENT SESSION</span><span className="ed-pulse">● {subjects === null ? "CONNECTING" : "READY"}</span></div>
             <div className="ed-card-intro"><span className="ed-glyph" aria-hidden="true"><i /><i /><i /></span><span>STUDY RECORD</span></div>
@@ -49,13 +34,22 @@ export default async function StudentDashboardPage() {
             )}
             <div className="ed-card-bottom"><span>{String(courses.length).padStart(2, "0")} SUBJECTS</span><span>{String(recent.length).padStart(2, "0")} RECENT LECTURES</span><span>EDUSENSE ©</span></div>
           </div>
-        </section>
+  );
+}
 
-        <section className="ed-section ed-container">
-          <div className="ed-section-header">
-            <div><p className="ed-eyebrow">01 / YOUR LIBRARY</p><h2>Subjects</h2></div>
-            <Link className="ed-inline-link" href="/courses">View library <ArrowUpRight size={16} /></Link>
-          </div>
+function StudyCardSkeleton() {
+  return <div className="ed-study-card" aria-label="Loading your study record">
+    <div className="ed-card-top"><span>DESK / CURRENT SESSION</span><span>LOADING</span></div>
+    <div className="ed-card-intro"><span className="ed-glyph" aria-hidden="true"><i /><i /><i /></span><span>STUDY RECORD</span></div>
+    <h2>Back to the<br />good stuff.</h2>
+    <div className="ed-next-lecture ed-no-link"><span><small>YOUR NEXT STEP</small><strong>Loading your library…</strong></span><BookOpen size={18}/></div>
+  </div>;
+}
+
+async function SubjectList() {
+  const subjects = await getCourses().catch(() => null);
+  const featured = (subjects ?? []).slice(0, 5);
+  return (
           <div className="ed-subject-list">
             {featured.length > 0 ? featured.map((course, i) => (
               <Link href={"/course/" + course.id} key={course.id} className="ed-subject-row">
@@ -71,14 +65,20 @@ export default async function StudentDashboardPage() {
               </div>
             )}
           </div>
-        </section>
+  );
+}
 
-        <section className="ed-lower ed-container">
-          <div>
-            <div className="ed-section-header ed-section-header-compact">
-              <div><p className="ed-eyebrow">02 / CONTINUE</p><h2>Recent lectures</h2></div>
-              <Link className="ed-inline-link" href="/practice">Practice <ArrowUpRight size={16} /></Link>
-            </div>
+function SubjectListSkeleton() {
+  return <div className="ed-subject-list" aria-label="Loading subjects">
+    <div className="ed-empty"><BookOpen size={22} strokeWidth={1.5}/><p>Loading subjects…</p></div>
+  </div>;
+}
+
+async function RecentList() {
+  const user = await getSessionUser();
+  const dashboard = user ? await getStudentDashboard(user.email).catch(() => null) : null;
+  const recent = dashboard?.recentLectures?.slice(0, 4) ?? [];
+  return (
             <div className="ed-recent-list">
               {recent.length > 0 ? recent.map((lecture) => (
                 <Link href={"/lecture/" + lecture.id} key={lecture.id} className="ed-recent-row">
@@ -88,6 +88,50 @@ export default async function StudentDashboardPage() {
                 </Link>
               )) : <div className="ed-recent-empty">Your recent lectures will show up here once you begin studying.</div>}
             </div>
+  );
+}
+
+function RecentListSkeleton() {
+  return <div className="ed-recent-list"><div className="ed-recent-empty">Loading recent lectures…</div></div>;
+}
+
+export default async function StudentDashboardPage() {
+  const user = await getSessionUser();
+  const greeting = user?.name?.split(" ")[0] ?? "there";
+  return (
+    <div className="ed-app">
+      <Navbar />
+      <main>
+        <section className="ed-hero ed-container">
+          <div className="ed-hero-copy">
+            <div className="ed-eyebrow"><span className="ed-square" /> THE STUDENT DESK / 001</div>
+            <p className="ed-greeting">Good to see you, {greeting}.</p>
+            <h1>Make room<br />for <em>learning.</em></h1>
+            <p className="ed-intro">Your lectures, notes, and questions. A little less searching, a lot more understanding.</p>
+            <div className="ed-actions">
+              <Link className="ed-button ed-button-dark" href="/courses">Browse subjects <ArrowUpRight size={17} /></Link>
+              <Link className="ed-inline-link" href="/doubts">Ask a question <ArrowRight size={16} /></Link>
+            </div>
+          </div>
+          <Suspense fallback={<StudyCardSkeleton />}><StudyCard /></Suspense>
+
+        </section>
+        <section className="ed-section ed-container">
+          <div className="ed-section-header">
+            <div><p className="ed-eyebrow">01 / YOUR LIBRARY</p><h2>Subjects</h2></div>
+            <Link className="ed-inline-link" href="/courses">View library <ArrowUpRight size={16} /></Link>
+          </div>
+          <Suspense fallback={<SubjectListSkeleton />}><SubjectList /></Suspense>
+
+        </section>
+        <section className="ed-lower ed-container">
+          <div>
+            <div className="ed-section-header ed-section-header-compact">
+              <div><p className="ed-eyebrow">02 / CONTINUE</p><h2>Recent lectures</h2></div>
+              <Link className="ed-inline-link" href="/practice">Practice <ArrowUpRight size={16} /></Link>
+            </div>
+            <Suspense fallback={<RecentListSkeleton />}><RecentList /></Suspense>
+
           </div>
           <aside className="ed-question-panel">
             <div className="ed-eyebrow">A BETTER QUESTION / 03</div>
