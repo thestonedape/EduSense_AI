@@ -43,8 +43,10 @@ export function LoginForm({ role, embedded = false, title, description }: LoginF
         return;
       }
 
+      // Student and admin pages are force-dynamic, so push() already renders
+      // them fresh with the new session cookie. An extra refresh() rendered the
+      // destination twice and doubled its backend reads on every sign-in.
       router.push(data.redirectTo);
-      router.refresh();
     });
   }
 
