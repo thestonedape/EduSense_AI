@@ -142,7 +142,8 @@ function isTimeoutError(error: unknown) {
 async function withNavigationDeadline<T>(label: string, request: (timeout: number) => Promise<T>) {
   const startedAt = Date.now();
   for (let attempt = 1; ; attempt += 1) {
-    const remaining = NAV_READ_DEADLINE_MS - (Date.now() - startedAt);
+    // Axios treats a timeout of 0 as "no timeout", so never pass less than 1 s.
+    const remaining = Math.max(1_000, NAV_READ_DEADLINE_MS - (Date.now() - startedAt));
     try {
       const result = await request(Math.min(NAV_READ_ATTEMPT_MS, remaining));
       const elapsed = Date.now() - startedAt;
