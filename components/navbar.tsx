@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Menu } from "lucide-react";
+import { BackendWarmup } from "@/components/backend-warmup";
 import { LogoutButton } from "@/components/logout-button";
 import { getSessionUser } from "@/lib/auth";
 
@@ -7,6 +8,7 @@ export async function Navbar() {
   const user = await getSessionUser();
   return (
     <header className="ed-nav">
+      <BackendWarmup />
       <div className="ed-container ed-nav-inner">
         <Link href="/" className="ed-brand" aria-label="EduSense home"><span className="ed-brand-sign">e<span>.</span></span><span>edusense</span></Link>
         <nav className="ed-links" aria-label="Student navigation">

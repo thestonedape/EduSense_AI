@@ -1,8 +1,11 @@
 import { BookOpenText, BrainCircuit, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
+import { BackendWarmup } from "@/components/backend-warmup";
 import { PortalAuthShell } from "@/components/portal-auth-shell";
 
 export default function StudentLoginPage() {
   return (
+    <>
+    <BackendWarmup />
     <PortalAuthShell
       brandIcon={GraduationCap} badgeIcon={ShieldCheck} badgeLabel="Student Portal"
       eyebrow="The modern study journal"
@@ -18,5 +21,6 @@ export default function StudentLoginPage() {
       ]}
       metrics={[]} theme="student"
     />
+    </>
   );
 }

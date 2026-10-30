@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +41,17 @@ const areaCopy = {
 
 export function AppCrashScreen({ error, reset, area }: AppCrashScreenProps) {
   const copy = areaCopy[area];
+  const router = useRouter();
+  const [retrying, startRetry] = useTransition();
+
+  // reset() alone only re-renders the cached server payload, so a failed
+  // server-component read would fail again without contacting the backend.
+  function retry() {
+    startRetry(() => {
+      router.refresh();
+      reset?.();
+    });
+  }
 
   useEffect(() => {
     if (error) {
@@ -74,7 +86,7 @@ export function AppCrashScreen({ error, reset, area }: AppCrashScreenProps) {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {reset ? <Button onClick={() => reset()}>Try Again</Button> : null}
+          {reset ? <Button onClick={retry} disabled={retrying}>{retrying ? "Retrying..." : "Try Again"}</Button> : null}
           <Button asChild variant="outline">
             <Link href={copy.homeHref}>{copy.homeLabel}</Link>
           </Button>

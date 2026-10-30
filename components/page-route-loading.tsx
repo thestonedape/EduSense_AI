@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/navbar";
+import { SlowLoadNotice } from "@/components/slow-load-notice";
 
 type PageRouteLoadingProps = {
   section: string;
@@ -14,6 +15,7 @@ export function PageRouteLoading({ section, cards = 3 }: PageRouteLoadingProps) 
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">{section}</p>
           <div className="h-9 w-56 max-w-full animate-pulse rounded-md bg-muted" />
           <div className="h-4 w-72 max-w-full animate-pulse rounded-md bg-muted" />
+          <SlowLoadNotice />
         </section>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-hidden="true">
           {Array.from({ length: cards }, (_, index) => (
