@@ -1,5 +1,6 @@
 import { GraduationCap } from "lucide-react";
 
+import { BackendWarmup } from "@/components/backend-warmup";
 import { LoginForm } from "@/components/login-form";
 import { PortalAccessShell } from "@/components/portal-access-shell";
 
@@ -17,6 +18,7 @@ export default function StudentAccessPage() {
       switchLabel="Admin access"
       theme="student"
     >
+      <BackendWarmup />
       <LoginForm
         role="student"
         title="Student sign in"

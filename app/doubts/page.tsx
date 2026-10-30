@@ -1,3 +1,4 @@
+import { BackendWarmup } from "@/components/backend-warmup";
 import { DoubtSolver } from "@/components/doubt-solver";
 import { getCourses } from "@/lib/api/server-services";
 
@@ -8,6 +9,7 @@ export default async function DoubtsPage() {
 
   return (
     <main className="h-dvh overflow-hidden">
+      <BackendWarmup />
       <DoubtSolver subjects={subjects} />
     </main>
   );

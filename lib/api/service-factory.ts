@@ -120,7 +120,51 @@ function isTransientApiError(error: unknown) {
   const value = error as AxiosError | undefined;
   const code = value?.code;
   const status = value?.response?.status;
-  return code === "ECONNRESET" || code === "ECONNABORTED" || status === 502 || status === 503 || status === 504;
+  return code === "ECONNRESET" || code === "ECONNABORTED" || code === "ETIMEDOUT" || status === 502 || status === 503 || status === 504;
+}
+
+// Student page reads block the navigation that triggered them. A Render Free
+// spin-up was measured at ~44 s (documented as "about one minute"), so the
+// deadline must outlast it, yet stay far below Vercel's 300 s function limit.
+// Per-attempt timeouts only recover requests lost while the instance restarts:
+// the first attempt has already woken it. Render holds requests during a
+// spin-up rather than failing them, so 5xx/reset errors get a shorter window.
+const NAV_READ_DEADLINE_MS = 70_000;
+const NAV_READ_ATTEMPT_MS = 25_000;
+const NAV_READ_ERROR_RETRY_MS = 15_000;
+const NAV_READ_SLOW_LOG_MS = 2_000;
+
+function isTimeoutError(error: unknown) {
+  const code = (error as AxiosError | undefined)?.code;
+  return code === "ECONNABORTED" || code === "ETIMEDOUT";
+}
+
+async function withNavigationDeadline<T>(label: string, request: (timeout: number) => Promise<T>) {
+  const startedAt = Date.now();
+  for (let attempt = 1; ; attempt += 1) {
+    // Axios treats a timeout of 0 as "no timeout", so never pass less than 1 s.
+    const remaining = Math.max(1_000, NAV_READ_DEADLINE_MS - (Date.now() - startedAt));
+    try {
+      const result = await request(Math.min(NAV_READ_ATTEMPT_MS, remaining));
+      const elapsed = Date.now() - startedAt;
+      if (elapsed >= NAV_READ_SLOW_LOG_MS) {
+        console.info(JSON.stringify({ event: "student_read_slow", route: label, attempt, ms: elapsed }));
+      }
+      return result;
+    } catch (error) {
+      const value = error as AxiosError | undefined;
+      const elapsed = Date.now() - startedAt;
+      const backoff = Math.min(1_000 * attempt, 5_000);
+      const retryWindow = isTimeoutError(error) ? NAV_READ_DEADLINE_MS : NAV_READ_ERROR_RETRY_MS;
+      if (!isTransientApiError(error) || retryWindow - elapsed <= backoff + 1_000) {
+        if (value?.response?.status !== 404) {
+          console.warn(JSON.stringify({ event: "student_read_failed", route: label, attempt, ms: elapsed, code: value?.code ?? null, status: value?.response?.status ?? null }));
+        }
+        throw error;
+      }
+      await sleep(backoff);
+    }
+  }
 }
 
 async function withApiRetry<T>(request: () => Promise<T>, attempts = 3) {
@@ -437,7 +481,7 @@ function normalizeStudentLectureDetail(item: Record<string, unknown>): StudentLe
 
 const getCourses = cache(async function getCourses(): Promise<StudentSubject[]> {
   return withRequiredApi(async () => {
-    const response = await api.get(`${API_PREFIX}/student/subjects`);
+    const response = await withNavigationDeadline("student/subjects", (timeout) => api.get(`${API_PREFIX}/student/subjects`, { timeout }));
     const payload = Array.isArray(response.data) ? response.data : [];
     return payload.map((item) => normalizeStudentSubject(item as Record<string, unknown>));
   });
@@ -448,9 +492,10 @@ const getStudentDashboard = cache(async function getStudentDashboard(
   includeStats = true,
 ): Promise<StudentDashboardData> {
   return withRequiredApi(async () => {
-    const response = await api.get(`${API_PREFIX}/student/dashboard`, {
+    const response = await withNavigationDeadline("student/dashboard", (timeout) => api.get(`${API_PREFIX}/student/dashboard`, {
       params: includeStats ? undefined : { include_stats: false },
-    });
+      timeout,
+    }));
     const payload = response.data as Record<string, unknown>;
     const statsValue = typeof payload.stats === "object" && payload.stats !== null ? (payload.stats as Record<string, unknown>) : {};
     const lectureItems = Array.isArray(payload.recent_lectures) ? payload.recent_lectures : [];
@@ -470,7 +515,7 @@ const getStudentDashboard = cache(async function getStudentDashboard(
 const getCourse = cache(async function getCourse(id: string): Promise<StudentSubjectDetail | null> {
   return withRequiredApi(async () => {
     try {
-      const response = await api.get(`${API_PREFIX}/student/subjects/${id}`);
+      const response = await withNavigationDeadline("student/subjects/[id]", (timeout) => api.get(`${API_PREFIX}/student/subjects/${id}`, { timeout }));
       const payload = response.data as Record<string, unknown>;
       const subjectValue = typeof payload.subject === "object" && payload.subject !== null ? (payload.subject as Record<string, unknown>) : null;
       const lecturesValue = Array.isArray(payload.lectures) ? payload.lectures : [];
@@ -496,7 +541,7 @@ const getCourse = cache(async function getCourse(id: string): Promise<StudentSub
 const getLecture = cache(async function getLecture(id: string): Promise<StudentLectureDetail | null> {
   return withRequiredApi(async () => {
     try {
-      const response = await withApiRetry(() => api.get(`${API_PREFIX}/student/lectures/${id}`));
+      const response = await withNavigationDeadline("student/lectures/[id]", (timeout) => api.get(`${API_PREFIX}/student/lectures/${id}`, { timeout }));
       return normalizeStudentLectureDetail(response.data as Record<string, unknown>);
     } catch (error) {
       const value = error as AxiosError | undefined;
@@ -529,7 +574,7 @@ async function postChat(message: string, lectureId: string): Promise<StudentChat
 
 async function getPracticeQuestions(limit = 6): Promise<PracticeQuestion[]> {
   return withRequiredApi(async () => {
-    const response = await api.get(`${API_PREFIX}/student/practice`, { params: { limit } });
+    const response = await withNavigationDeadline("student/practice", (timeout) => api.get(`${API_PREFIX}/student/practice`, { params: { limit }, timeout }));
     const payload = response.data as Record<string, unknown>;
     const items = Array.isArray(payload.questions) ? payload.questions : [];
     return items.map((item, index) => {
