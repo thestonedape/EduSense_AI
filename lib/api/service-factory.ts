@@ -27,6 +27,8 @@ import {
 
 export function createServices(api: AxiosInstance, hasApiBaseUrl: boolean) {
 const API_PREFIX = "/api/v1";
+// Keep interactive route reads bounded without shortening AI and upload operations.
+const STUDENT_NAV_TIMEOUT_MS = 25_000;
 
 function pickString(value: Record<string, unknown>, keys: string[], fallback = "") {
   for (const key of keys) {
@@ -437,7 +439,7 @@ function normalizeStudentLectureDetail(item: Record<string, unknown>): StudentLe
 
 const getCourses = cache(async function getCourses(): Promise<StudentSubject[]> {
   return withRequiredApi(async () => {
-    const response = await api.get(`${API_PREFIX}/student/subjects`);
+    const response = await api.get(`${API_PREFIX}/student/subjects`, { timeout: STUDENT_NAV_TIMEOUT_MS });
     const payload = Array.isArray(response.data) ? response.data : [];
     return payload.map((item) => normalizeStudentSubject(item as Record<string, unknown>));
   });
@@ -450,6 +452,7 @@ const getStudentDashboard = cache(async function getStudentDashboard(
   return withRequiredApi(async () => {
     const response = await api.get(`${API_PREFIX}/student/dashboard`, {
       params: includeStats ? undefined : { include_stats: false },
+      timeout: STUDENT_NAV_TIMEOUT_MS,
     });
     const payload = response.data as Record<string, unknown>;
     const statsValue = typeof payload.stats === "object" && payload.stats !== null ? (payload.stats as Record<string, unknown>) : {};
@@ -470,7 +473,7 @@ const getStudentDashboard = cache(async function getStudentDashboard(
 const getCourse = cache(async function getCourse(id: string): Promise<StudentSubjectDetail | null> {
   return withRequiredApi(async () => {
     try {
-      const response = await api.get(`${API_PREFIX}/student/subjects/${id}`);
+      const response = await api.get(`${API_PREFIX}/student/subjects/${id}`, { timeout: STUDENT_NAV_TIMEOUT_MS });
       const payload = response.data as Record<string, unknown>;
       const subjectValue = typeof payload.subject === "object" && payload.subject !== null ? (payload.subject as Record<string, unknown>) : null;
       const lecturesValue = Array.isArray(payload.lectures) ? payload.lectures : [];
@@ -496,7 +499,7 @@ const getCourse = cache(async function getCourse(id: string): Promise<StudentSub
 const getLecture = cache(async function getLecture(id: string): Promise<StudentLectureDetail | null> {
   return withRequiredApi(async () => {
     try {
-      const response = await withApiRetry(() => api.get(`${API_PREFIX}/student/lectures/${id}`));
+      const response = await withApiRetry(() => api.get(`${API_PREFIX}/student/lectures/${id}`, { timeout: STUDENT_NAV_TIMEOUT_MS }), 2);
       return normalizeStudentLectureDetail(response.data as Record<string, unknown>);
     } catch (error) {
       const value = error as AxiosError | undefined;
@@ -529,7 +532,7 @@ async function postChat(message: string, lectureId: string): Promise<StudentChat
 
 async function getPracticeQuestions(limit = 6): Promise<PracticeQuestion[]> {
   return withRequiredApi(async () => {
-    const response = await api.get(`${API_PREFIX}/student/practice`, { params: { limit } });
+    const response = await api.get(`${API_PREFIX}/student/practice`, { params: { limit }, timeout: STUDENT_NAV_TIMEOUT_MS });
     const payload = response.data as Record<string, unknown>;
     const items = Array.isArray(payload.questions) ? payload.questions : [];
     return items.map((item, index) => {
