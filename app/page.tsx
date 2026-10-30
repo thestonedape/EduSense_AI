@@ -18,7 +18,7 @@ async function StudyCard() {
   const recent = dashboard?.recentLectures?.slice(0, 4) ?? [];
   return (
           <div className="ed-study-card">
-            <div className="ed-card-top"><span>DESK / CURRENT SESSION</span><span className="ed-pulse">● {subjects === null ? "CONNECTING" : "READY"}</span></div>
+            <div className="ed-card-top"><span>DESK / CURRENT SESSION</span><span className="ed-pulse">● {subjects === null ? "UNAVAILABLE" : "READY"}</span></div>
             <div className="ed-card-intro"><span className="ed-glyph" aria-hidden="true"><i /><i /><i /></span><span>STUDY RECORD</span></div>
             <h2>Back to the<br />good stuff.</h2>
             {recent.length > 0 ? (
@@ -28,7 +28,7 @@ async function StudyCard() {
               </Link>
             ) : (
               <div className="ed-next-lecture ed-no-link">
-                <span><small>YOUR NEXT STEP</small><strong>{subjects === null ? "Connecting to your library…" : "Choose a subject to begin"}</strong></span>
+                <span><small>YOUR NEXT STEP</small><strong>{subjects === null ? "Refresh to retry your library" : "Choose a subject to begin"}</strong></span>
                 <BookOpen size={18} />
               </div>
             )}
