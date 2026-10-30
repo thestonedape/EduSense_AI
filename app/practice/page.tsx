@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Navbar } from "@/components/navbar";
 import { QuizCard } from "@/components/quiz-card";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +5,7 @@ import { getPracticeQuestions } from "@/lib/api/server-services";
 
 export const dynamic = "force-dynamic";
 
-async function PracticeContent() {
+export default async function PracticePage() {
   const questions = await getPracticeQuestions(9);
   const groups = questions.reduce<Record<string, typeof questions>>((accumulator, question) => {
     const key = question.subjectId || question.subjectName || question.subjectCode || "general";
@@ -17,7 +16,9 @@ async function PracticeContent() {
   const subjectGroups = Object.entries(groups);
 
   return (
-    <>
+    <div>
+      <Navbar />
+      <main className="page-wrap space-y-8">
         <section className="surface overflow-hidden p-5 sm:p-8">
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="space-y-4">
@@ -89,42 +90,6 @@ async function PracticeContent() {
             </CardContent>
           </Card>
         )}
-    </>
-  );
-}
-
-function PracticeSkeleton() {
-  return (
-    <div className="space-y-8" role="status" aria-label="Loading practice">
-      <section className="surface grid gap-6 p-5 sm:p-8 lg:grid-cols-2" aria-hidden="true">
-        <div className="space-y-4">
-          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-          <div className="h-12 w-3/4 animate-pulse rounded bg-muted" />
-          <div className="h-16 w-full animate-pulse rounded bg-muted" />
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <div key={index} className="h-28 animate-pulse rounded-2xl bg-muted" />
-          ))}
-        </div>
-      </section>
-      <div className="grid gap-4 xl:grid-cols-2" aria-hidden="true">
-        {Array.from({ length: 2 }, (_, index) => (
-          <div key={index} className="surface h-48 animate-pulse p-5" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function PracticePage() {
-  return (
-    <div>
-      <Navbar />
-      <main className="page-wrap space-y-8">
-        <Suspense fallback={<PracticeSkeleton />}>
-          <PracticeContent />
-        </Suspense>
       </main>
     </div>
   );

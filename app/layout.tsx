@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
 
 import "@/app/globals.css";
-import { NavigationProgress } from "@/components/navigation-progress";
 
 const sans = DM_Sans({
   variable: "--font-sans",
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${sans.variable} ${display.variable} min-h-screen font-sans`}><NavigationProgress />{children}</body>
+      <body className={`${sans.variable} ${display.variable} min-h-screen font-sans`}>{children}</body>
     </html>
   );
 }
